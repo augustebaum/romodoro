@@ -1,0 +1,23 @@
+[package]
+authors = ["Auguste Baum <apt.baum@gmail.com>"]
+name = "romodoro"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+yew = { git = "https://github.com/yewstack/yew/", features = ["csr"] }
+wasm-bindgen = "0.2"
+gloo-timers = "0.2.4"
+gloo-console = "0.2.1"
+time = "0.3.9"
+
+[dependencies.web-sys]
+version = "0.3"
+# We need to enable all the web-sys features we want to use!
+features = [
+  "console",
+  "Document",
+  "HtmlElement",
+  "MouseEvent",
+  "DomRect",
+]
