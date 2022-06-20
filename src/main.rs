@@ -1,54 +1,34 @@
 use gloo_console::debug;
 use gloo_timers::callback::{Interval, Timeout};
-// use std::time;
-// use std::prelude::Trait;
 use time::{ext::NumericalDuration, Duration};
 use yew::prelude::*;
+mod time_utils;
+use time_utils::{to_millis, to_string};
 
-/// Convert duration to milliseconds.
-///
-/// For use with `gloo` `Interval`s and `Timeout`s.
-///
-/// Note this is not appropriate for durations
-/// with non-integer number of milliseconds.
-fn to_millis(period: Duration) -> u32 {
-    period.whole_milliseconds() as u32
-}
-
-/// Convert duration to string in format `min:sec`.
-///
-/// # Examples
-///
-/// ```
-/// use time::ext::NumericalDuration;
-///
-/// assert_eq!("1000:00", to_string(1_000.minutes()))
-/// assert_eq!("16:40", to_string(1_000.seconds()))
-/// assert_eq!("00:00", to_string(0.seconds()))
-/// ```
-fn to_string(period: Duration) -> String {
-    let minutes = period.whole_minutes();
-    let seconds = period.whole_seconds() % 60;
-    format!("{:02}:{:02}", minutes, seconds)
-}
-
+#[derive(Debug, Clone)]
 enum State {
     Idle,
     Work,
     Break,
+    Paused,
 }
 
 struct PomoTimer {
     work_period: Duration,
     break_period: Duration,
     state: State,
+    previous_state: State,
     time_remaining: Duration,
-    timer: Option<Timeout>,     // Tracks end of time remaining
+    timer: Option<Timeout>,     // Tracks time remaining
     interval: Option<Interval>, // Makes seconds tick
 }
 
 impl PomoTimer {
-    fn set_timer(&mut self, ctx: &Context<Self>, duration: Duration) {
+    fn set_state(&mut self, state: State) {
+        self.previous_state = self.state.clone();
+        self.state = state;
+    }
+    fn start_timer(&mut self, ctx: &Context<Self>, duration: Duration) {
         self.time_remaining = duration;
         self.timer = Some({
             let link = ctx.link().clone();
@@ -66,10 +46,24 @@ impl PomoTimer {
             Interval::new(to_millis(1.seconds()), move || link.send_message(Msg::Tick))
         });
     }
+
+    fn timer_button(&self, ctx: &Context<Self>) -> Html {
+        let (msg, text) = match self.state {
+            State::Idle | State::Paused => (Msg::StartTimer, "Start timer"),
+            State::Work | State::Break => (Msg::PauseTimer, "Pause timer"),
+        };
+        html! {
+            <button onclick={ ctx.link().callback(move |_| msg.clone()) }>
+                { text }
+            </button>
+        }
+    }
 }
 
+#[derive(Clone)]
 enum Msg {
     StartTimer,
+    PauseTimer,
     Tick,
     Done,
 }
@@ -81,6 +75,7 @@ impl Component for PomoTimer {
     fn create(_ctx: &Context<Self>) -> Self {
         Self {
             state: State::Idle,
+            previous_state: State::Idle,
             work_period: 5.seconds(),
             break_period: 3.seconds(),
             time_remaining: 0.seconds(),
@@ -93,18 +88,39 @@ impl Component for PomoTimer {
         match msg {
             Msg::StartTimer => {
                 let duration = match self.state {
-                    State::Idle | State::Break => {
-                        debug!("Start work period!");
-                        self.state = State::Work;
-                        self.work_period
+                    State::Idle => match self.previous_state {
+                        State::Break | State::Idle => {
+                            debug!("Start work period!");
+                            self.set_state(State::Work);
+                            self.work_period
+                        }
+                        State::Work => {
+                            debug!("Start break period!");
+                            self.set_state(State::Break);
+                            self.break_period
+                        }
+                        _ => {
+                            panic!("Should not happen!")
+                        }
+                    },
+                    State::Paused => {
+                        debug!("Unpause!");
+                        self.set_state(self.previous_state.clone());
+                        // Time when the timer was paused
+                        self.time_remaining
                     }
-                    State::Work => {
-                        debug!("Start break period!");
-                        self.state = State::Break;
-                        self.break_period
+                    _ => {
+                        panic!("Should not happen!")
                     }
                 };
-                self.set_timer(ctx, duration);
+                self.start_timer(ctx, duration);
+                true
+            }
+            Msg::PauseTimer => {
+                debug!("Pause!");
+                self.set_state(State::Paused);
+                self.interval = None;
+                self.timer = None;
                 true
             }
             Msg::Tick => {
@@ -114,6 +130,7 @@ impl Component for PomoTimer {
             }
             Msg::Done => {
                 debug!("Done!");
+                self.set_state(State::Idle);
                 self.interval = None;
                 true
             }
@@ -123,9 +140,10 @@ impl Component for PomoTimer {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <div>
-                <button onclick={ ctx.link().callback(|_| Msg::StartTimer) }>
-                    { "Start timer" }
-                </button>
+                { self.timer_button(ctx) }
+                // Debug
+                // <p>{ format!("Current state: {:?}", self.state) }</p>
+                // <p>{ format!("Previous state: {:?}", self.previous_state) }</p>
                 <p>{ to_string(self.time_remaining) }</p>
             </div>
         }
