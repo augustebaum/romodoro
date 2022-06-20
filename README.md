@@ -17,14 +17,19 @@ The defaults should be 25 minutes work, 5 minutes break.
 - [ ] The work and break periods should be reset-able (one can start again from the
 beginning of a period, or periods before that, in chronological order).
 
+## Developing
+Follow the [Yew setup process](https://yew.rs/docs/getting-started/introduction)
+and run the app locally with
+```sh
+trunk serve
+```
+
 ## Implementation notes
 ### Overview
 - The timer is modelled by a Yew component named `PomoTimer`.
-- The timer is controlled via `Msg`s, so that each kind of
-`Msg`s elicits different behaviour from `PomoTimer`.
+- The timer is controlled via `Msg`s, so that each kind of `Msg`s elicits different behaviour from `PomoTimer`.
 - `PomoTimer` is in one of the states given in the `State` enum.
-A certain `Msg` can elicit different behaviour depending
-on the `State` `PomoTimer` is in.
+A certain `Msg` can elicit different behaviour depending on the `State` `PomoTimer` is in.
 
 ### Properties (could be automatically checked or proved)
 - `PomoTimer` state can never go from `Idle` to `Paused`.
