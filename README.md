@@ -1,5 +1,5 @@
-# Romodoro -- Pomodoro in Rust
-This is a webapp for a Pomodoro timer, similar to [Pomofocus](pomofocus.io) and others.
+# Romodoro
+This is Pomodoro timer web-app, similar to [Pomofocus](pomofocus.io) and others.
 It is built in Rust and WebAssembly through the Yew framework.
 
 ## Features
