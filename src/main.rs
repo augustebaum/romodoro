@@ -8,8 +8,8 @@ use time_utils::{to_millis, to_string};
 #[derive(Debug, Clone)]
 enum State {
     Idle,
-    Work,
-    Break,
+    InWork,
+    InBreak,
     Paused,
 }
 
@@ -50,12 +50,11 @@ impl PomoTimer {
     fn timer_button(&self, ctx: &Context<Self>) -> Html {
         let (msg, text) = match self.state {
             State::Idle | State::Paused => (Msg::StartTimer, "Start timer"),
-            State::Work | State::Break => (Msg::PauseTimer, "Pause timer"),
+            State::InWork | State::InBreak => (Msg::PauseTimer, "Pause timer"),
         };
+        let onclick = ctx.link().callback(move |_| msg.clone());
         html! {
-            <button onclick={ ctx.link().callback(move |_| msg.clone()) }>
-                { text }
-            </button>
+            <button id="timer_button" {onclick}>{ text }</button>
         }
     }
 }
@@ -76,7 +75,7 @@ impl Component for PomoTimer {
         Self {
             state: State::Idle,
             previous_state: State::Idle,
-            work_period: 5.seconds(),
+            work_period: 1.seconds(),
             break_period: 3.seconds(),
             time_remaining: 0.seconds(),
             timer: None,
@@ -89,14 +88,14 @@ impl Component for PomoTimer {
             Msg::StartTimer => {
                 let duration = match self.state {
                     State::Idle => match self.previous_state {
-                        State::Break | State::Idle => {
+                        State::InBreak | State::Idle => {
                             debug!("Start work period!");
-                            self.set_state(State::Work);
+                            self.set_state(State::InWork);
                             self.work_period
                         }
-                        State::Work => {
+                        State::InWork => {
                             debug!("Start break period!");
-                            self.set_state(State::Break);
+                            self.set_state(State::InBreak);
                             self.break_period
                         }
                         _ => {
@@ -144,7 +143,7 @@ impl Component for PomoTimer {
                 // Debug
                 // <p>{ format!("Current state: {:?}", self.state) }</p>
                 // <p>{ format!("Previous state: {:?}", self.previous_state) }</p>
-                <p>{ to_string(self.time_remaining) }</p>
+                <p id="time_remaining">{ to_string(self.time_remaining) }</p>
             </div>
         }
     }

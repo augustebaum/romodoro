@@ -1,0 +1,22 @@
+
+#timer_button {
+  font-size: 24px;
+  padding: 12px 28px;
+  width: 200px;
+  border-radius: 12px;
+  transition-duration: 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #aaaaaa;
+  }
+}
+
+#time_remaining {
+  font-size: 50px;
+}
+
+div {
+  margin-top: 30px;
+  text-align: center;
+}
