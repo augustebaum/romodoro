@@ -9,6 +9,9 @@ It is built in Rust and WebAssembly through the Yew framework.
 pauses the timer).
 
 ## Later
+- [ ] [pomofocus.io](https://pomofocus.io/) should be given proper credit.
+- [ ] The site should have a colored background, with the color depending on the kind of session (like in
+[pomofocus.io](https://pomofocus.io/)).
 - [ ] After 4 work sessions, the break should be 15 seconds long.
 - [ ] The user should be notified when a period has ended.
 - [ ] The work and break periods should have configurable durations.
