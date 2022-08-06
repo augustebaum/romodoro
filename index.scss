@@ -1,3 +1,19 @@
+$timer_background: #d75653;
+
+body {
+  background-color: $timer_background;
+}
+
+#timer_div {
+  margin-top: 30px;
+  margin: auto;
+  padding: 10px;
+  max-width: 400px;
+  text-align: center;
+  align-content: space-between;
+
+  background-color: scale-color($page-background, $lightness: +15%);
+}
 
 #timer_button {
   font-size: 24px;
@@ -14,9 +30,12 @@
 
 #time_remaining {
   font-size: 50px;
+  padding: 0px;
+  margin: 0px;
 }
 
-div {
-  margin-top: 30px;
-  text-align: center;
+footer {
+  position: fixed;
+  justify-content: right;
+  bottom: 0;
 }

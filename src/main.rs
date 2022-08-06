@@ -16,6 +16,7 @@ enum State {
 struct PomoTimer {
     work_period: Duration,
     break_period: Duration,
+
     state: State,
     previous_state: State,
     time_remaining: Duration,
@@ -139,13 +140,19 @@ impl Component for PomoTimer {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <div>
+            <>
+            <div id="timer_div">
                 { self.timer_button(ctx) }
                 // Debug
                 // <p>{ format!("Current state: {:?}", self.state) }</p>
                 // <p>{ format!("Previous state: {:?}", self.previous_state) }</p>
                 <p id="time_remaining">{ to_string(self.time_remaining) }</p>
             </div>
+            // Yuck. Could we just put that in the HTML template?
+            <footer>
+                { "Inspired by " }<a href="https://pomofocus.io">{ "pomofocus.io" }</a>{ "." }
+            </footer>
+            </>
         }
     }
 
