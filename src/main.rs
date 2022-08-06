@@ -9,8 +9,8 @@ use time_utils::{to_millis, to_string};
 enum State {
     Idle,
     InWork,
-    InBreak,
     Paused,
+    InBreak,
 }
 
 struct PomoTimer {
@@ -28,6 +28,7 @@ impl PomoTimer {
         self.previous_state = self.state.clone();
         self.state = state;
     }
+
     fn start_timer(&mut self, ctx: &Context<Self>, duration: Duration) {
         self.time_remaining = duration;
         self.timer = Some({
@@ -75,8 +76,8 @@ impl Component for PomoTimer {
         Self {
             state: State::Idle,
             previous_state: State::Idle,
-            work_period: 1.seconds(),
-            break_period: 3.seconds(),
+            work_period: 1.seconds(),  // To customize
+            break_period: 3.seconds(), // To customize
             time_remaining: 0.seconds(),
             timer: None,
             interval: None,
