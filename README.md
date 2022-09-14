@@ -13,6 +13,8 @@ pauses the timer).
 ## Later
 - [ ] The site's background color should change depending on the kind of session (work or break), like in
 [Pomofocus](https://pomofocus.io/).
+  - In progress: It seems like [stylist](https://github.com/futursolo/stylist-rs/issues/87) is the best
+  option to manipulate CSS dynamically, but [I can't seem to figure out how to do it yet](https://github.com/futursolo/stylist-rs/issues/87).
 - [ ] After 4 work sessions, the break should be 15 seconds long.
 - [ ] The user should be notified when a period has ended.
 - [ ] The work and break periods should have configurable durations.

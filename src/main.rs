@@ -2,6 +2,7 @@ use gloo_console::debug;
 use gloo_timers::callback::{Interval, Timeout};
 use time::{ext::NumericalDuration, Duration};
 use yew::prelude::*;
+
 mod time_utils;
 use time_utils::{to_millis, to_string};
 
@@ -29,6 +30,11 @@ impl PomoTimer {
         self.previous_state = self.state.clone();
         self.state = state;
     }
+
+    // fn set_bg_color(&mut self, color: Color) {
+    //     self.canvas_color = color;
+    //     self.timer_color = color + 15% brightness
+    // }
 
     fn start_timer(&mut self, ctx: &Context<Self>, duration: Duration) {
         self.time_remaining = duration;
@@ -131,6 +137,7 @@ impl Component for PomoTimer {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <>
+            // <div id="background" class={css!("background-color: #dd6000;")}>
             <div id="background" style="background-color: #dd6000;">
             <div id="timer_div">
                 { self.timer_button(ctx) }
