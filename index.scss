@@ -1,17 +1,41 @@
-$timer_background: #d75653;
+$page_background: #d75653;
 
-body {
-  background-color: $timer_background;
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+// https://stackoverflow.com/questions/70020000/how-to-make-div-cover-whole-page-and-not-only-viewport
+div#background {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  margin: 0;
+  padding: 0;
+
+  height: 100%;
+  width: 100%;
+
+  overflow-x: auto;
+  background-color: $page_background;
+
+  display: flex;
+  justify-content: center;
 }
 
 #timer_div {
   margin-top: 30px;
-  margin: auto;
+  margin-bottom: auto;
+
   padding: 10px;
-  max-width: 400px;
+
+  width: 400px;
+
   text-align: center;
   align-content: space-between;
 
+  border-radius: 14px;
   background-color: scale-color($page-background, $lightness: +15%);
 }
 

@@ -131,12 +131,14 @@ impl Component for PomoTimer {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <>
+            <div id="background" style="background-color: #dd6000;">
             <div id="timer_div">
                 { self.timer_button(ctx) }
                 // Debug
                 // <p>{ format!("Current state: {:?}", self.state) }</p>
                 // <p>{ format!("Previous state: {:?}", self.previous_state) }</p>
                 <p id="time_remaining">{ to_string(self.time_remaining) }</p>
+            </div>
             </div>
             // Yuck. Could we just put that in the HTML template?
             <footer>
