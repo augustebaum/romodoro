@@ -5,7 +5,7 @@ use yew::prelude::*;
 mod time_utils;
 use time_utils::{to_millis, to_string};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 enum State {
     Idle,
     InWork,
@@ -14,8 +14,8 @@ enum State {
 }
 
 struct PomoTimer {
-    work_period: Duration,
-    break_period: Duration,
+    work_period_duration: Duration,
+    break_period_duration: Duration,
 
     state: State,
     previous_state: State,
@@ -37,7 +37,7 @@ impl PomoTimer {
             // Stop the time out the moment *after* the last Tick,
             // so that the `time_remaining` can reach 0 seconds.
             // Otherwise we'd have to manually set `time_remaining`
-            // to 0 when `Done` is sent.
+            // to 0 when `Done` is sent, which seems like overkill.
             // TODO: Is there are way other than those two hacky ones?
             Timeout::new(to_millis(duration) + 1, move || {
                 link.send_message(Msg::Done)
@@ -77,8 +77,8 @@ impl Component for PomoTimer {
         Self {
             state: State::Idle,
             previous_state: State::Idle,
-            work_period: 1.seconds(),  // To customize
-            break_period: 3.seconds(), // To customize
+            work_period_duration: 2.seconds(),  // To customize
+            break_period_duration: 5.seconds(), // To customize
             time_remaining: 0.seconds(),
             timer: None,
             interval: None,
@@ -86,56 +86,46 @@ impl Component for PomoTimer {
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Msg::StartTimer => {
-                let duration = match self.state {
-                    State::Idle => match self.previous_state {
-                        State::InBreak | State::Idle => {
-                            debug!("Start work period!");
-                            self.set_state(State::InWork);
-                            self.work_period
-                        }
-                        State::InWork => {
-                            debug!("Start break period!");
-                            self.set_state(State::InBreak);
-                            self.break_period
-                        }
-                        _ => {
-                            panic!("Should not happen!")
-                        }
-                    },
-                    State::Paused => {
-                        debug!("Unpause!");
-                        self.set_state(self.previous_state.clone());
-                        // Time when the timer was paused
-                        self.time_remaining
-                    }
-                    _ => {
-                        panic!("Should not happen!")
-                    }
-                };
-                self.start_timer(ctx, duration);
-                true
+        use Msg::*;
+        use State::*;
+
+        match (msg, self.state, self.previous_state) {
+            (StartTimer, Idle, InBreak | Idle) => {
+                debug!("Start work period!");
+                self.set_state(State::InWork);
+                self.start_timer(ctx, self.work_period_duration);
             }
-            Msg::PauseTimer => {
+            (StartTimer, Idle, InWork) => {
+                debug!("Start break period!");
+                self.set_state(State::InBreak);
+                self.start_timer(ctx, self.break_period_duration);
+            }
+            (StartTimer, Paused, _) => {
+                debug!("Unpause!");
+                self.set_state(self.previous_state.clone());
+                // Time when the timer was paused
+                self.start_timer(ctx, self.time_remaining);
+            }
+            (PauseTimer, _, _) => {
                 debug!("Pause!");
                 self.set_state(State::Paused);
                 self.interval = None;
                 self.timer = None;
-                true
             }
-            Msg::Tick => {
+            (Tick, _, _) => {
                 debug!("Tick!");
                 self.time_remaining -= 1.seconds();
-                true
             }
-            Msg::Done => {
+            (Done, _, _) => {
                 debug!("Done!");
                 self.set_state(State::Idle);
                 self.interval = None;
-                true
             }
-        }
+            (_, _, _) => {
+                panic!("Message-state combination should not happen!")
+            }
+        };
+        true
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
